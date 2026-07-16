@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:build/build.dart';
+import 'package:build_runner_core/build_runner_core.dart' show buildLog;
 import 'package:build_test/build_test.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:logging/logging.dart';
@@ -12,6 +14,31 @@ final _formatter = DartFormatter(
   languageVersion: Version(3, 7, 0),
   lineEnding: '\n',
 );
+
+/// Recent `build_test` versions no longer rethrow generator exceptions from
+/// `testBuilder`; they're only observable as a SEVERE [LogRecord] whose
+/// message is the exception's formatted `toString()`. This wraps that text so
+/// tests can still assert on the formatted error output.
+class GeneratorError {
+  final String _formatted;
+  GeneratorError(this._formatted);
+
+  String format([bool color = false]) => _formatted;
+
+  @override
+  String toString() => _formatted;
+}
+
+/// Builder outputs are recorded under their logical [AssetId], but may be
+/// written to the "hidden" on-disk location (`.dart_tool/build/generated/...`)
+/// rather than the visible one. Resolve to whichever actually exists.
+String _readOutput(TestReaderWriter readerWriter, AssetId id) {
+  if (readerWriter.testing.exists(id)) {
+    return readerWriter.testing.readString(id);
+  }
+  final hiddenId = AssetId('pkg', '.dart_tool/build/generated/${id.package}/${id.path}');
+  return readerWriter.testing.readString(hiddenId);
+}
 
 /// Used to test both correct an erroneous compilation.
 /// [source] can be a [File] or a [String].
@@ -43,17 +70,30 @@ void testCompile(
 
   test(description, () async {
     generate() async {
-      final writer = InMemoryAssetWriter();
+      final readerWriter = TestReaderWriter(rootPackage: 'pkg');
+      await readerWriter.testing.loadIsolateSources();
+      LogRecord? severeLog;
+      // build_runner's BuildLogLogger drops anything below WARNING unless
+      // verbose is enabled, which would otherwise silently swallow the
+      // generator's own `log.info(...)` calls (e.g. info_test.dart).
+      buildLog.configuration = buildLog.configuration.rebuild((b) => b.verbose = true);
       await testBuilder(
         generateRealmObjects(),
         {'pkg|$assetName': '$source'},
-        writer: writer,
-        reader: await PackageAssetReader.currentIsolate(),
-        onLog: onLog,
+        readerWriter: readerWriter,
+        onLog: (log) {
+          if (log.level >= Level.SEVERE) severeLog = log;
+          onLog?.call(log);
+        },
       );
-      return _formatter.format(
-        String.fromCharCodes(writer.assets.entries.single.value),
-      );
+      if (severeLog case final log?) {
+        if (log.error != null) throw log.error!;
+        // The generator's exception isn't preserved by the build pipeline, only its
+        // formatted message ("<builder context>:\n<original message>") is logged.
+        throw GeneratorError(log.message.split('\n').skip(1).join('\n'));
+      }
+      final output = readerWriter.testing.assetsWritten.singleWhere((id) => id.path.endsWith('.realm.dart'));
+      return _formatter.format(_readOutput(readerWriter, output));
     }
 
     expect(generate(), matcher);
@@ -90,7 +130,8 @@ void testCompileMany(
 
   test(description, () {
     generate() async {
-      final writer = InMemoryAssetWriter();
+      final readerWriter = TestReaderWriter(rootPackage: 'pkg');
+      await readerWriter.testing.loadIsolateSources();
       await testBuilder(
         generateRealmObjects(),
         Map<String, Object>.fromEntries(
@@ -99,12 +140,10 @@ void testCompileMany(
             return MapEntry(id, source);
           }),
         ),
-        writer: writer,
-        reader: await PackageAssetReader.currentIsolate(),
+        readerWriter: readerWriter,
       );
-      return writer.assets.values.map(
-        (charCodes) => String.fromCharCodes(charCodes),
-      );
+      final outputs = readerWriter.testing.assetsWritten.where((id) => id.path.endsWith('.realm.dart'));
+      return outputs.map((id) => _readOutput(readerWriter, id));
     }
 
     expect(generate(), matcher);

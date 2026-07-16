@@ -18,8 +18,8 @@ import 'session.dart';
 import 'type_checkers.dart';
 import 'utils.dart';
 
-ElementDeclarationResult? getDeclarationFromElement(Element element) {
-  return session.resolvedLibrary.getElementDeclaration(element);
+FragmentDeclarationResult? getDeclarationFromElement(Element element) {
+  return session.resolvedLibrary.getFragmentDeclaration(element.firstFragment);
 }
 
 extension on FileSpan {
@@ -47,6 +47,21 @@ extension ElementEx on Element {
     try {
       return spanForElement(this) as FileSpan;
     } catch (_) {}
+    final self = this;
+    if (self is ConstructorElement) {
+      // Unnamed constructors have a `null` fragment `nameOffset` by analyzer
+      // design (there's no `new` token to point at), which source_gen's
+      // `spanForElement` doesn't handle. Fall back to the fragment's `offset`,
+      // which points at the enclosing class name instead.
+      try {
+        final fragment = self.firstFragment;
+        final libraryFragment = fragment.libraryFragment;
+        final file = SourceFile.fromString(libraryFragment.source.contents.data, url: libraryFragment.source.uri);
+        final offset = fragment.offset;
+        final length = self.enclosingElement.name?.length ?? 0;
+        return file.span(offset, offset + length);
+      } catch (_) {}
+    }
     return null;
   }
 

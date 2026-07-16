@@ -24,13 +24,13 @@ class MissingGetter extends DartLintRule {
     CustomLintContext context,
   ) {
     context.registry.addConstructorDeclaration((node) {
-      final ctor = node.declaredElement;
+      final ctor = node.declaredFragment?.element;
       if (ctor == null) return; // not resolved;
       if (isEJsonAnnotated(ctor)) {
-        final cls = ctor.enclosingElement3 as ClassElement;
-        for (final param in ctor.parameters) {
-          final getter = cls.getGetter(param.name);
-          if (getter == null) reporter.atElement(param, code);
+        final cls = ctor.enclosingElement as ClassElement;
+        for (final param in ctor.formalParameters) {
+          final getter = cls.getGetter(param.name!);
+          if (getter == null) reporter.atElement2(param, code);
         }
       }
     });

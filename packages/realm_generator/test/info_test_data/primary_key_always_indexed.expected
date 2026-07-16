@@ -1,4 +1,4 @@
-[INFO] testBuilder: Indexed is implied for a primary key
+Indexed is implied for a primary key
 
 in: asset:pkg/test/info_test_data/primary_key_always_indexed.dart:9:12
   ╷

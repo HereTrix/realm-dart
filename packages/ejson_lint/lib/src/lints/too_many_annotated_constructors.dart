@@ -32,13 +32,13 @@ class TooManyAnnotatedConstructors extends DartLintRule {
     CustomLintContext context,
   ) {
     context.registry.addClassDeclaration((node) {
-      final cls = node.declaredElement;
+      final cls = node.declaredFragment?.element;
       if (cls == null) return; // not resolved;
 
       final annotatedConstructors = cls.constructors.where((ctor) => isEJsonAnnotated(ctor));
       if (annotatedConstructors.length > 1) {
         for (final ctor in annotatedConstructors) {
-          reporter.atElement(ctor, code);
+          reporter.atElement2(ctor, code);
         }
       }
     });

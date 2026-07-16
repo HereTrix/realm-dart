@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:logging/logging.dart';
 import 'package:term_glyph/term_glyph.dart';
 import 'package:test/test.dart';
 
@@ -19,8 +20,15 @@ void main() async {
         return firstLog?.normalizeLineEndings() == infoFile.readAsStringSync().normalizeLineEndings();
       })),
       onLog: (record) {
-        if (firstLog == null && record.loggerName == 'testBuilder') {
-          firstLog = '$record';
+        // build_runner prefixes every builder log with a "Generating ... on
+        // <file>:\n" builder-context line; the generator's own message follows
+        // it. Progress-reporting noise ("Running X", "[generate (n)] ...") uses
+        // the same prefix but has no such continuation, so skip those.
+        if (firstLog == null && record.level == Level.INFO && record.message.contains('\n')) {
+          final message = record.message.split('\n').skip(1).join('\n');
+          if (message.trim().isNotEmpty && !message.startsWith('[generate') && !message.startsWith('Running ')) {
+            firstLog = message;
+          }
         }
       },
     );

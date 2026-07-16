@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:build_test/build_test.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:ejson_generator/ejson_generator.dart';
+import 'package:logging/logging.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:test/test.dart';
 import 'package:meta/meta.dart';
@@ -30,14 +31,27 @@ void testCompile(String description, dynamic source, dynamic matcher, {dynamic s
 
   test(description, () {
     generate() async {
-      final writer = InMemoryAssetWriter();
+      final readerWriter = TestReaderWriter(rootPackage: 'pkg', flattenOutput: true);
+      await readerWriter.testing.loadIsolateSources();
+      LogRecord? severeLog;
       await testBuilder(
         getEJsonGenerator(),
         {'pkg|source.dart': source as Object},
-        writer: writer,
-        reader: await PackageAssetReader.currentIsolate(),
+        readerWriter: readerWriter,
+        flattenOutput: true,
+        onLog: (log) {
+          if (log.level >= Level.SEVERE) severeLog = log;
+        },
       );
-      return _formatter.format(String.fromCharCodes(writer.assets.entries.single.value));
+      if (severeLog case final log?) {
+        if (log.error != null) throw log.error!;
+        // The generator's exception isn't preserved by the build pipeline, only its
+        // formatted message ("<builder context>:\n<original message>") is logged.
+        final message = log.message.split('\n').skip(1).join('\n');
+        throw InvalidGenerationSourceError(message);
+      }
+      final output = readerWriter.testing.assetsWritten.singleWhere((id) => id.path.endsWith('.g.part'));
+      return _formatter.format(readerWriter.testing.readString(output));
     }
 
     expect(generate(), matcher);
