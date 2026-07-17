@@ -21,7 +21,10 @@ class Options {
   @CliOption(hide: true, help: 'Force install, even if we would normally skip it.', defaultsTo: false)
   bool force;
 
-  Options({this.targetOsType, this.force = false, this.debug = false});
+  @CliOption(help: 'Download the latest published Realm binaries instead of the version pinned in pubspec.yaml.', defaultsTo: false)
+  bool latest;
+
+  Options({this.targetOsType, this.force = false, this.debug = false, this.latest = false});
 }
 
 String get usage => _$parserForOptions.usage;

@@ -30,6 +30,7 @@ Options _$parseOptionsResult(ArgResults result) => Options(
       ),
       force: result['force'] as bool,
       debug: result['debug'] as bool,
+      latest: result['latest'] as bool,
     )..flavor = _$nullableEnumValueHelperNullable(
         _$FlavorEnumMapBuildCli,
         result['flavor'] as String?,
@@ -77,6 +78,11 @@ ArgParser _$populateOptionsParser(
         'force',
         help: 'Force install, even if we would normally skip it.',
         hide: true,
+      )
+      ..addFlag(
+        'latest',
+        help:
+            'Download the latest published Realm binaries instead of the version pinned in pubspec.yaml.',
       );
 
 final _$parserForOptions = _$populateOptionsParser(ArgParser());

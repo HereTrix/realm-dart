@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:pub_semver/pub_semver.dart';
@@ -30,6 +31,7 @@ class InstallCommand extends Command<void> {
   late final flavor = options.flavor!;
   late final force = options.force; // not used!?!
   late final targetOsType = options.targetOsType!;
+  late final latest = options.latest;
 
   InstallCommand() {
     pubspec = parsePubspec(File('pubspec.yaml'));
@@ -108,6 +110,23 @@ class InstallCommand extends Command<void> {
     await versionFile.writeAsString(version.toString());
   }
 
+  Future<Version> getLatestPublishedVersion(String packageName) async {
+    final client = HttpClient();
+    try {
+      final request = await client.getUrl(Uri.parse('https://pub.dev/api/packages/$packageName'));
+      final response = await request.close();
+      if (response.statusCode >= 400) {
+        throw Exception('Error fetching latest published version for $packageName from pub.dev. Error code: ${response.statusCode}');
+      }
+      final body = await response.transform(utf8.decoder).join();
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      final latestVersion = (json['latest'] as Map<String, dynamic>)['version'] as String;
+      return Version.parse(latestVersion);
+    } finally {
+      client.close(force: true);
+    }
+  }
+
   Future<Directory> getPackagePath(String name) async {
     final packageConfig = await findPackageConfig(Directory.current);
     if (packageConfig == null) {
@@ -151,7 +170,15 @@ class InstallCommand extends Command<void> {
     final binaryPath = getBinaryPath(realmPackagePath, flavor);
     print(binaryPath);
     final archiveName = '${targetOsType.name}.tar.gz';
-    await downloadAndExtractBinaries(binaryPath, realmPubspec.version!, archiveName);
+
+    var binaryVersion = realmPubspec.version!;
+    if (latest) {
+      print('Fetching latest published version of $flavorName from pub.dev...');
+      binaryVersion = await getLatestPublishedVersion(flavorName);
+      print('Using latest published version: $binaryVersion');
+    }
+
+    await downloadAndExtractBinaries(binaryPath, binaryVersion, archiveName);
 
     print('Realm install command finished.');
   }
