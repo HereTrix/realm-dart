@@ -75,7 +75,15 @@ class InstallCommand extends Command<void> {
     }
 
     if (!await destinationDir.exists()) {
-      await destinationDir.create(recursive: true);
+      // The destination can be a dangling symlink, e.g. in a git checkout of this repo,
+      // where Directory.create fails. Create the link target instead.
+      final link = Link(destinationDir.absolute.path);
+      if (await link.exists()) {
+        final target = path.normalize(path.join(path.dirname(link.path), await link.target()));
+        await Directory(target).create(recursive: true);
+      } else {
+        await destinationDir.create(recursive: true);
+      }
     }
 
     final destinationFile = File(path.join(Directory.systemTemp.createTempSync('realm-binary-').absolute.path, archiveName));
