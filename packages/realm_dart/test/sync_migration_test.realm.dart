@@ -1,5 +1,5 @@
-// dart format width=80
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
 
 part of 'sync_migration_test.dart';
 
@@ -113,9 +113,9 @@ class NullablesV0 extends _NullablesV0
       RealmObjectBase.getChanges<NullablesV0>(this);
 
   @override
-  Stream<RealmObjectChanges<NullablesV0>> changesFor(
-          [List<String>? keyPaths]) =>
-      RealmObjectBase.getChangesFor<NullablesV0>(this, keyPaths);
+  Stream<RealmObjectChanges<NullablesV0>> changesFor([
+    List<String>? keyPaths,
+  ]) => RealmObjectBase.getChangesFor<NullablesV0>(this, keyPaths);
 
   @override
   NullablesV0 freeze() => RealmObjectBase.freezeObject<NullablesV0>(this);
@@ -140,10 +140,7 @@ class NullablesV0 extends _NullablesV0
   static NullablesV0 _fromEJson(EJsonValue ejson) {
     if (ejson is! Map<String, dynamic>) return raiseInvalidEJson(ejson);
     return switch (ejson) {
-      {
-        '_id': EJsonValue id,
-        'differentiator': EJsonValue differentiator,
-      } =>
+      {'_id': EJsonValue id, 'differentiator': EJsonValue differentiator} =>
         NullablesV0(
           fromEJson(id),
           fromEJson(differentiator),
@@ -165,22 +162,40 @@ class NullablesV0 extends _NullablesV0
     RealmObjectBase.registerFactory(NullablesV0._);
     register(_toEJson, _fromEJson);
     return const SchemaObject(
-        ObjectType.realmObject, NullablesV0, 'Nullables', [
-      SchemaProperty('id', RealmPropertyType.objectid,
-          mapTo: '_id', primaryKey: true),
-      SchemaProperty('differentiator', RealmPropertyType.objectid),
-      SchemaProperty('boolValue', RealmPropertyType.bool, optional: true),
-      SchemaProperty('intValue', RealmPropertyType.int, optional: true),
-      SchemaProperty('doubleValue', RealmPropertyType.double, optional: true),
-      SchemaProperty('decimalValue', RealmPropertyType.decimal128,
-          optional: true),
-      SchemaProperty('dateValue', RealmPropertyType.timestamp, optional: true),
-      SchemaProperty('stringValue', RealmPropertyType.string, optional: true),
-      SchemaProperty('objectIdValue', RealmPropertyType.objectid,
-          optional: true),
-      SchemaProperty('uuidValue', RealmPropertyType.uuid, optional: true),
-      SchemaProperty('binaryValue', RealmPropertyType.binary, optional: true),
-    ]);
+      ObjectType.realmObject,
+      NullablesV0,
+      'Nullables',
+      [
+        SchemaProperty(
+          'id',
+          RealmPropertyType.objectid,
+          mapTo: '_id',
+          primaryKey: true,
+        ),
+        SchemaProperty('differentiator', RealmPropertyType.objectid),
+        SchemaProperty('boolValue', RealmPropertyType.bool, optional: true),
+        SchemaProperty('intValue', RealmPropertyType.int, optional: true),
+        SchemaProperty('doubleValue', RealmPropertyType.double, optional: true),
+        SchemaProperty(
+          'decimalValue',
+          RealmPropertyType.decimal128,
+          optional: true,
+        ),
+        SchemaProperty(
+          'dateValue',
+          RealmPropertyType.timestamp,
+          optional: true,
+        ),
+        SchemaProperty('stringValue', RealmPropertyType.string, optional: true),
+        SchemaProperty(
+          'objectIdValue',
+          RealmPropertyType.objectid,
+          optional: true,
+        ),
+        SchemaProperty('uuidValue', RealmPropertyType.uuid, optional: true),
+        SchemaProperty('binaryValue', RealmPropertyType.binary, optional: true),
+      ],
+    );
   }();
 
   @override
@@ -300,9 +315,9 @@ class NullablesV1 extends _NullablesV1
       RealmObjectBase.getChanges<NullablesV1>(this);
 
   @override
-  Stream<RealmObjectChanges<NullablesV1>> changesFor(
-          [List<String>? keyPaths]) =>
-      RealmObjectBase.getChangesFor<NullablesV1>(this, keyPaths);
+  Stream<RealmObjectChanges<NullablesV1>> changesFor([
+    List<String>? keyPaths,
+  ]) => RealmObjectBase.getChangesFor<NullablesV1>(this, keyPaths);
 
   @override
   NullablesV1 freeze() => RealmObjectBase.freezeObject<NullablesV1>(this);
@@ -364,21 +379,29 @@ class NullablesV1 extends _NullablesV1
     RealmObjectBase.registerFactory(NullablesV1._);
     register(_toEJson, _fromEJson);
     return const SchemaObject(
-        ObjectType.realmObject, NullablesV1, 'Nullables', [
-      SchemaProperty('id', RealmPropertyType.objectid,
-          mapTo: '_id', primaryKey: true),
-      SchemaProperty('differentiator', RealmPropertyType.objectid),
-      SchemaProperty('boolValue', RealmPropertyType.bool),
-      SchemaProperty('intValue', RealmPropertyType.int),
-      SchemaProperty('doubleValue', RealmPropertyType.double),
-      SchemaProperty('decimalValue', RealmPropertyType.decimal128),
-      SchemaProperty('dateValue', RealmPropertyType.timestamp),
-      SchemaProperty('stringValue', RealmPropertyType.string),
-      SchemaProperty('objectIdValue', RealmPropertyType.objectid),
-      SchemaProperty('uuidValue', RealmPropertyType.uuid),
-      SchemaProperty('binaryValue', RealmPropertyType.binary),
-      SchemaProperty('willBeRemoved', RealmPropertyType.string),
-    ]);
+      ObjectType.realmObject,
+      NullablesV1,
+      'Nullables',
+      [
+        SchemaProperty(
+          'id',
+          RealmPropertyType.objectid,
+          mapTo: '_id',
+          primaryKey: true,
+        ),
+        SchemaProperty('differentiator', RealmPropertyType.objectid),
+        SchemaProperty('boolValue', RealmPropertyType.bool),
+        SchemaProperty('intValue', RealmPropertyType.int),
+        SchemaProperty('doubleValue', RealmPropertyType.double),
+        SchemaProperty('decimalValue', RealmPropertyType.decimal128),
+        SchemaProperty('dateValue', RealmPropertyType.timestamp),
+        SchemaProperty('stringValue', RealmPropertyType.string),
+        SchemaProperty('objectIdValue', RealmPropertyType.objectid),
+        SchemaProperty('uuidValue', RealmPropertyType.uuid),
+        SchemaProperty('binaryValue', RealmPropertyType.binary),
+        SchemaProperty('willBeRemoved', RealmPropertyType.string),
+      ],
+    );
   }();
 
   @override
