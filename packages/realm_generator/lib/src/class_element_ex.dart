@@ -109,7 +109,7 @@ extension ClassElementEx on ClassElement {
       }
 
       // Check that no constructor is defined.
-      final explicitCtors = constructors.where((c) => !c.isSynthetic);
+      final explicitCtors = constructors.where((c) => !c.isOriginImplicitDefault);
       if (explicitCtors.isNotEmpty) {
         final ctor = explicitCtors.first;
         throw RealmInvalidGenerationSourceError(

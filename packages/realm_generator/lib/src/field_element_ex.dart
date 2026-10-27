@@ -64,7 +64,7 @@ extension FieldElementEx on FieldElement {
 
   RealmFieldInfo? get realmInfo {
     try {
-      if (!(getter?.isSynthetic ?? false)) {
+      if (getter?.isOriginDeclaration ?? true) {
         // skip explicitly defined getters
         return null;
       }

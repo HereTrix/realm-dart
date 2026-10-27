@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:build/build.dart';
-import 'package:build_runner_core/build_runner_core.dart' show buildLog;
 import 'package:build_test/build_test.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:logging/logging.dart';
@@ -76,10 +75,10 @@ void testCompile(
       // build_runner's BuildLogLogger drops anything below WARNING unless
       // verbose is enabled, which would otherwise silently swallow the
       // generator's own `log.info(...)` calls (e.g. info_test.dart).
-      buildLog.configuration = buildLog.configuration.rebuild((b) => b.verbose = true);
       await testBuilder(
         generateRealmObjects(),
         {'pkg|$assetName': '$source'},
+        verbose: true,
         readerWriter: readerWriter,
         onLog: (log) {
           if (log.level >= Level.SEVERE) severeLog = log;
